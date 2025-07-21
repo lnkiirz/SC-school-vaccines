@@ -39,7 +39,9 @@ vax_clean <-
     County
   ) |> 
   ungroup() |> 
-  arrange(Year, County) 
+  arrange(Year, County)
+
+theme_set(theme_minimal())
 
 ggplot(
   data = vax_clean |> filter(County != "Statewide"),
@@ -65,13 +67,24 @@ vax_overall_increase <-
     pct_change = Year_2022 - Year_2018
   )
 
+state_avg <-
+  vax_overall_increase |> 
+  filter(County == "Statewide") |> 
+  pull(pct_change)
+
 ggplot(
-  data = vax_overall_increase |> filter(County != "Statewide"),
-  aes(x = desc(as.numeric(Year)), y = `% exempted`, group = County, fill = "green")
+  data = vax_overall_increase |> 
+    filter(County != "Statewide"),
+  aes(x = reorder(County, pct_change), y = pct_change, fill = if_else(pct_change > state_avg, "darkorange", "dark green"))
 ) +
-  scale_fill_manual(values = "dark green") +
   geom_col(position = position_dodge()) +
+  scale_fill_manual(values = c("darkorange" = "darkorange", "dark green" = "dark green")) +
   coord_flip() +
   theme(
     legend.position = "none"
+  ) +
+  geom_hline(
+    yintercept = state_avg,
+    color = "red",
+    linewidth = 1
   )
