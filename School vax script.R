@@ -43,16 +43,37 @@ vax_clean <-
 
 theme_set(theme_minimal())
 
-ggplot(
-  data = vax_clean |> filter(County != "Statewide"),
-  aes(x = Year, y = `% exempted`, group = County, fill = "darkblue")
+change_by_county_graph <-
+  ggplot(
+  data = vax_clean |> 
+    filter(County != "Statewide") |> 
+    mutate(
+      Year = case_match(
+      Year, 
+      "Year_2018" ~ 2018,
+      "Year_2019" ~ 2019,
+      "Year_2020" ~ 2020,
+      "Year_2021" ~ 2021,
+      "Year_2022" ~ 2022)
+    ),
+  aes(x = reorder(Year, -`% exempted`), y = `% exempted`, group = County, fill = "darkblue")
 ) +
   scale_fill_manual(values = "darkblue") +
   geom_col(position = position_dodge()) +
   coord_flip() +
   theme(
     legend.position = "none"
-  )
+  ) +
+  facet_wrap(~ County) +
+  xlab("Year")
+
+ggsave(
+  "Change by county.jpeg",
+  plot = change_by_county_graph,
+  width = 2500,
+  height = 1900,
+  units = "px"
+)
 
 vax_overall_increase <-
   vax_clean |> 
@@ -101,11 +122,11 @@ overall_change_graph <-
     title = "SC - School Vaccine Exemptions by County",
     subtitle = "Percent change between 2018-2023. Counties higher than state average in orange."
   ) +
-  ylab("Overall Percent Change (2018-2023)") +
+  ylab("Overall Percent Change (2018-2022 school years)") +
   xlab("County")
   
 
 ggsave(
-  "Overall change graph.png",
+  "Overall change graph.jpeg",
   plot = overall_change_graph
 )
