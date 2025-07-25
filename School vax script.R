@@ -1,14 +1,34 @@
 library(tidyverse)
 library(readxl)
+library(tabulapdf)
 
 data_source <- 
   "https://dph.sc.gov/sites/scdph/files/media/document/Religious_Exemption_Rates_Last_5_School_Years_as_of_22-23.pdf"
 
 vax_data <-
-  read_excel(
-    "Religious exemptions through 2023.xlsx",
-    sheet = 2
-  )
+  extract_tables(data_source)[[1]]
+  colnames(vax_data) <- 
+    c(
+    "County",
+    "2018-2019_enrolled",
+    "2018-2019_count",
+    "2018-2019_pct",
+    "2019-2020_enrolled",
+    "2019-2020_count",
+    "2019-2020_pct",
+    "2020-2021_enrolled",
+    "2020-2021_count",
+    "2020-2021_pct",
+    "2021-2022_enrolled",
+    "2021-202_count",
+    "2021-2022_pct",
+    "2022-2023_enrolled",
+    "2022-2023_count",
+    "2022-2023_pct"
+    )
+vax_data <-
+  vax_data[-c(1:2), ] |> 
+  # need to clean up numerics and percents
 
 vax_clean <-
   vax_data |> 
